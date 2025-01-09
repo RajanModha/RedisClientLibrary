@@ -14,8 +14,9 @@ public static class RedisClientExtensions
     /// <param name="services">The service collection to add the Redis client to.</param>
     /// <param name="connectionString">The connection string for Redis.</param>
     /// <param name="enforceKeyFormat">Optional regex string to enforce key format rules.</param>
+    /// <param name="serviceLifetime">Optional ServiceLifetime to register IRedisClient, default ServiceLifetime is ServiceLifetime.Scoped.</param>
     /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddRedisClient(this IServiceCollection services, string connectionString, string? enforceKeyFormat = null)
+    public static IServiceCollection AddRedisClient(this IServiceCollection services, string connectionString, string? enforceKeyFormat = null, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -31,7 +32,18 @@ public static class RedisClientExtensions
         }
 
         services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
-        services.AddTransient<IRedisClient>(_ => new RedisClient(connectionMultiplexer, keyFormatRegex));
+        switch (serviceLifetime)
+        {
+            case ServiceLifetime.Singleton:
+                services.AddSingleton<IRedisClient>(_ => new RedisClient(connectionMultiplexer, keyFormatRegex));
+                break;
+            case ServiceLifetime.Transient:
+                services.AddTransient<IRedisClient>(_ => new RedisClient(connectionMultiplexer, keyFormatRegex));
+                break;
+            default:
+                services.AddScoped<IRedisClient>(_ => new RedisClient(connectionMultiplexer, keyFormatRegex));
+                break;
+        }
 
         return services;
     }
