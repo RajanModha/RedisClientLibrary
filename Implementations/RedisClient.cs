@@ -33,7 +33,7 @@ internal class RedisClient(IConnectionMultiplexer connectionMultiplexer, Regex? 
         return System.Text.Json.JsonSerializer.Deserialize<T>(value);
     }
 
-    public async Task Push<T>(string key, T value, TimeSpan? expiry = null)
+    public async Task Upsert<T>(string key, T value, TimeSpan? expiry = null)
     {
         ValidateKey(key);
         var serializedValue = System.Text.Json.JsonSerializer.Serialize(value);
@@ -53,7 +53,7 @@ internal class RedisClient(IConnectionMultiplexer connectionMultiplexer, Regex? 
         {
             throw new InvalidOperationException($"Key '{key}' does not exist.");
         }
-        await Push(key, value, expiry);
+        await Upsert(key, value, expiry);
     }
 
     public async Task Delete(string key)

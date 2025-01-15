@@ -20,7 +20,7 @@ public interface IRedisClient
     /// <param name="key">The key under which to store the value.</param>
     /// <param name="value">The value to store.</param>
     /// <param name="expiry">The optional expiration time for the key.</param>
-    Task Push<T>(string key, T value, TimeSpan? expiry = null);
+    Task Upsert<T>(string key, T value, TimeSpan? expiry = null);
 
     /// <summary>
     /// Checks if a key exists in Redis.
